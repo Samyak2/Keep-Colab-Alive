@@ -1,4 +1,4 @@
-# Keep-Colab-Alive
+# Keep Colab Alive
 
 A selenium script to keep colab sessions running for longer and automate it (to some extent)
 
