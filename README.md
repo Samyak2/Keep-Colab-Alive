@@ -2,12 +2,12 @@
 
 A selenium script to keep colab sessions running for longer and automate it (to some extent)
 
-# Features
+## Features
 
  - Keeps clicking on status indicator to keep colab alive
- - Executes given cells if not already executing
+ - Executes given cells if not already running
 
-# Usage
+## Usage
 
 Requires Python3 with selenium installed through pip. Run using `python3 keep_colab_alive.py`.
 See `python3 keep_colab_alive.py --help` for the help page (not updated yet).
@@ -21,7 +21,9 @@ To the cell IDs, run the script with the `-c` flag like `python3 keep_colab_aliv
 
 Feel free to open an issue if there is any problem.
 
-# TODO
+## TODO
 
  - [ ] Connect to runtime and execute all cells if runtime gets disconnected.
+
+Open an issue if you want to suggest a feature.
 

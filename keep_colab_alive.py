@@ -12,7 +12,8 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
 parser = argparse.ArgumentParser(prog="Keep Colab Alive",
-                                 description='Colab automation using selenium')
+                                 description='Colab automation using selenium',
+                                 epilog="Check out the project at https://github.com/Samyak2/Keep-Colab-Alive")
 parser.add_argument("-c", "--cells-only",
                     dest="cells_only",
                     default=False,
