@@ -19,22 +19,44 @@ parser.add_argument("-c", "--cells-only",
                     default=False,
                     action="store_true",
                     help="Lists all the cell IDs and some of their contents, then exits")
+parser.add_argument("--firefox-profile",
+                    dest="profile_path",
+                    default=None,
+                    help="Path to your (newly made) Firefox profile. You can get the path by typing `about:profiles` and look for 'Root Directory'")
+parser.add_argument("--url",
+                    dest="url",
+                    default=None,
+                    help="URL to the colab")
+parser.add_argument("--cells",
+                    dest="cells_to_execute",
+                    default=None,
+                    help="Comma separated list of cell IDs to execute if not already executing")
 args = parser.parse_args()
 
+if not args.profile_path:
+    profile_path = os.getenv("FIREFOX_PROFILE", "")
+    if not profile_path:
+        print("Set the FIREFOX_PROFILE environment variable to avoid entering the profile path every time")
+        profile_path = input("Enter the profile path: ")
+else:
+    profile_path = args.profile_path
 
-profile_path = os.getenv("FIREFOX_PROFILE", "")
-if not profile_path:
-    print("Set the FIREFOX_PROFILE environment variable to avoid entering the profile path every time")
-    profile_path = input("Enter the profile path: ")
-url = os.getenv("COLAB_URL", "")
-if not url:
-    print("Set the COLAB_URL environment variable to avoid entering the url every time")
-    url = input("Enter the url: ")
-cells_to_execute = os.getenv("COLAB_CELLS", "")
-if not args.cells_only and not cells_to_execute:
-    print("Set the COLAB_CELLS environment variable to avoid entering every time")
-    print("Run this script with the -c flag to get the cell IDs.")
-    cells_to_execute = input("Enter a comma-separated list of cell IDs: ")
+if not args.url:
+    url = os.getenv("COLAB_URL", "")
+    if not url:
+        print("Set the COLAB_URL environment variable to avoid entering the url every time")
+        url = input("Enter the url: ")
+else:
+    url = args.url
+
+if not args.cells_to_execute:
+    cells_to_execute = os.getenv("COLAB_CELLS", "")
+    if not args.cells_only and not cells_to_execute:
+        print("Set the COLAB_CELLS environment variable to avoid entering every time")
+        print("Run this script with the -c flag to get the cell IDs.")
+        cells_to_execute = input("Enter a comma-separated list of cell IDs to execute (leave empty if you don't want to execute anything): ")
+else:
+    cells_to_execute = argscells_to_execute
 cells_to_execute = cells_to_execute.split(",")
 
 execute_cell_button_xpath = "//div[@id='{}']//paper-icon-button[contains(@title, 'Run cell')]"
@@ -82,6 +104,7 @@ try:
         try:
             useless_element.click()
         except selenium.common.exceptions.ElementClickInterceptedException as e:
+            driver.execute_script(ok_button_js)
             failed_times += 1
             if failed_times % 5 == 0:
                 print(f"Clicking is failing a lot: {failed_times} times")
