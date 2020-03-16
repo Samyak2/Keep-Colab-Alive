@@ -16,7 +16,8 @@ A selenium script to keep Google Colaboratory sessions running for longer and au
 ## Usage
 
 Requires Python3 with selenium installed through pip. Run using `python3 keep_colab_alive.py`.
-See `python3 keep_colab_alive.py --help` for the help page (not updated yet).
+
+See `python3 keep_colab_alive.py --help` for the help page.
 
 Arguments are taken through environment variables, if they are not set you will be prompted to enter them. Currently available arguments:
  - `FIREFOX_PROFILE`: The path to your Firefox profile through which you have logged in to Google. You can get the path by going to `about:profiles` in the Firefox URL bar. I suggest you create a new profile since a new profile starts up much faster than a bloated/old profile.
@@ -31,6 +32,7 @@ Feel free to open an issue if there is any problem.
 
  - [ ] Connect to runtime and execute all cells if runtime gets disconnected.
  - [x] More command line arguments
+ - [x] Ask user input only in interactive mode
 
 Open an issue if you want to suggest a feature.
 

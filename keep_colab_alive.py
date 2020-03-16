@@ -3,6 +3,7 @@ import time
 import random
 import argparse
 import shutil
+import sys
 
 import selenium
 from selenium import webdriver
@@ -13,50 +14,72 @@ from selenium.webdriver.support import expected_conditions as EC
 
 parser = argparse.ArgumentParser(prog="Keep Colab Alive",
                                  description='Colab automation using selenium',
-                                 epilog="Check out the project at https://github.com/Samyak2/Keep-Colab-Alive")
+                                 epilog=("Check out the project at "
+                                         "https://github.com/Samyak2/Keep-Colab-Alive"))
 parser.add_argument("-c", "--cells-only",
                     dest="cells_only",
                     default=False,
                     action="store_true",
                     help="Lists all the cell IDs and some of their contents, then exits")
+parser.add_argument("-i", "--interactive",
+                    dest="interactive",
+                    default=False,
+                    action="store_true",
+                    help=("Interactive mode. User can enter input as when asked instead "
+                          "of specifying command line arguments."))
 parser.add_argument("--firefox-profile",
                     dest="profile_path",
                     default=None,
-                    help="Path to your (newly made) Firefox profile. You can get the path by typing `about:profiles` and look for 'Root Directory'")
+                    help=("Path to your (newly made) Firefox profile. You can get the path"
+                          " by typing `about:profiles` and look for 'Root Directory'"))
 parser.add_argument("--url",
                     dest="url",
                     default=None,
                     help="URL to the colab")
 parser.add_argument("--cells",
                     dest="cells_to_execute",
-                    default=None,
+                    default="",
                     help="Comma separated list of cell IDs to execute if not already executing")
 args = parser.parse_args()
+
+input_err_msg = ("Input {} is required to run. Use -i or --interactive for interactive mode or"
+                 " see the help page using -h or --help for more details.")
 
 if not args.profile_path:
     profile_path = os.getenv("FIREFOX_PROFILE", "")
     if not profile_path:
-        print("Set the FIREFOX_PROFILE environment variable to avoid entering the profile path every time")
-        profile_path = input("Enter the profile path: ")
+        if args.interactive:
+            print("Set the FIREFOX_PROFILE environment variable to avoid",
+                  "entering the profile path every time")
+            profile_path = input("Enter the profile path: ")
+        else:
+            print(input_err_msg.format("--firefox-profile"))
+            sys.exit()
 else:
     profile_path = args.profile_path
 
 if not args.url:
     url = os.getenv("COLAB_URL", "")
     if not url:
-        print("Set the COLAB_URL environment variable to avoid entering the url every time")
-        url = input("Enter the url: ")
+        if args.interactive:
+            print("Set the COLAB_URL environment variable to avoid entering the url every time")
+            url = input("Enter the url: ")
+        else:
+            print(input_err_msg.format("--url"))
+            sys.exit()
 else:
     url = args.url
 
 if not args.cells_to_execute:
     cells_to_execute = os.getenv("COLAB_CELLS", "")
     if not args.cells_only and not cells_to_execute:
-        print("Set the COLAB_CELLS environment variable to avoid entering every time")
-        print("Run this script with the -c flag to get the cell IDs.")
-        cells_to_execute = input("Enter a comma-separated list of cell IDs to execute (leave empty if you don't want to execute anything): ")
+        if args.interactive:
+            print("Set the COLAB_CELLS environment variable to avoid entering every time")
+            print("Run this script with the -c flag to get the cell IDs.")
+            cells_to_execute = input(("Enter a comma-separated list of cell IDs to execute "
+                                      "(leave empty if you don't want to execute anything): "))
 else:
-    cells_to_execute = argscells_to_execute
+    cells_to_execute = args.cells_to_execute
 cells_to_execute = cells_to_execute.split(",")
 
 execute_cell_button_xpath = "//div[@id='{}']//paper-icon-button[contains(@title, 'Run cell')]"
@@ -94,7 +117,7 @@ try:
             print(cell_content[:100], "...")
             print("*"*shutil.get_terminal_size().columns)
         driver.close()
-        exit()
+        sys.exit()
 
     time.sleep(10)
 
@@ -127,8 +150,6 @@ try:
                         cell_ex_element.click()
                     except (selenium.common.exceptions.ElementNotInteractableException,
                             selenium.common.exceptions.ElementClickInterceptedException) as e:
-                        # ok_button_element = WebDriverWait(driver, 5).until(EC.element_to_be_clickable((By.XPATH, ok_button_xpath)))
-                        # ok_button_element.click()
                         print("Could not click element", cell_element)
                         driver.execute_script(ok_button_js)
                         cell_element.click()
